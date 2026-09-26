@@ -1,0 +1,6 @@
+{
+  "name": "Roommate Expenses",
+  "description": "Manage group room expenses, track shared wallet deposits, debit room costs, and view monthly statistics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

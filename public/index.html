@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Roommate Expenses & Shared Wallet | React Web App</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#EEF2FF',
+              100: '#E0E7FF',
+              400: '#818CF8',
+              500: '#6366F1',
+              600: '#4F46E5',
+              700: '#4338CA',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- React 18 & Babel for JSX -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #090D16;
+      color: #F8FAFC;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090D16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1E293B;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+    @keyframes scanline {
+      0% { top: 0%; opacity: 0.8; }
+      50% { opacity: 1; }
+      100% { top: 100%; opacity: 0.8; }
+    }
+    .scanner-line {
+      animation: scanline 2.2s ease-in-out infinite alternate;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center bg-[#090D16] text-slate-100 selection:bg-indigo-500 selection:text-white">
+
+  <!-- React Root Element -->
+  <div id="root" class="w-full max-w-xl flex flex-col min-h-screen pb-24"></div>
+
+  <!-- React Application Source Code -->
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    // Default Seed Data
+    const INITIAL_ROOMMATES = [
+      { id: "1", name: "Vinod Kumar", email: "uvinodkumar614@gmail.com", phone: "+1 (555) 019-2831", isAdmin: true, color: "#6366F1", avatarLetter: "V" },
+      { id: "2", name: "Alex Chen", email: "alex.chen@example.com", phone: "+1 (555) 014-9210", isAdmin: false, color: "#10B981", avatarLetter: "A" },
+      { id: "3", name: "Jordan Smith", email: "jordan.s@example.com", phone: "+1 (555) 018-4422", isAdmin: false, color: "#F59E0B", avatarLetter: "J" },
+      { id: "4", name: "Sarah Miller", email: "sarah.m@example.com", phone: "+1 (555) 012-7711", isAdmin: false, color: "#EC4899", avatarLetter: "S" }
+    ];
+
+    const INITIAL_TRANSACTIONS = [
+      {
+        id: "tx-1",
+        title: "Costco Monthly Groceries & Supplies",
+        amount: 218.40,
+        category: "Groceries",
+        isRoomExpense: true,
+        isSettled: false,
+        approvalStatus: "APPROVED",
+        paidById: "1",
+        paidByName: "Vinod Kumar",
+        date: "Today, 10:45 AM",
+        note: "Shared snacks, oil, pantry items"
+      },
+      {
+        id: "tx-2",
+        title: "High-Speed Fiber Internet",
+        amount: 80.00,
+        category: "Utilities",
+        isRoomExpense: true,
+        isSettled: false,
+        approvalStatus: "APPROVED",
+        paidById: "2",
+        paidByName: "Alex Chen",
+        date: "Yesterday, 4:20 PM",
+        note: "Monthly bill 1Gbps"
+      },
+      {
+        id: "tx-3",
+        title: "Late Night DoorDash Delivery",
+        amount: 32.50,
+        category: "Personal Spend",
+        isRoomExpense: false,
+        isSettled: false,
+        approvalStatus: "PENDING",
+        paidById: "3",
+        paidByName: "Jordan Smith",
+        date: "2 days ago",
+        note: "Personal sushi order debited"
+      },
+      {
+        id: "tx-4",
+        title: "Kitchen Cleaning Supplies & Trash Bags",
+        amount: 45.20,
+        category: "Household",
+        isRoomExpense: true,
+        isSettled: false,
+        approvalStatus: "APPROVED",
+        paidById: "4",
+        paidByName: "Sarah Miller",
+        date: "3 days ago",
+        note: "Dish soaps, sponges, paper towels"
+      },
+      {
+        id: "tx-5",
+        title: "Pharmacy & Medicine",
+        amount: 24.00,
+        category: "Personal Spend",
+        isRoomExpense: false,
+        isSettled: false,
+        approvalStatus: "PENDING",
+        paidById: "1",
+        paidByName: "Vinod Kumar",
+        date: "4 days ago",
+        note: "Personal medication"
+      }
+    ];
+
+    const CATEGORIES = [
+      { name: "Groceries", icon: "🛒", color: "text-emerald-400" },
+      { name: "Utilities", icon: "⚡", color: "text-amber-400" },
+      { name: "Household", icon: "🧹", color: "text-blue-400" },
+      { name: "Dining & Food", icon: "🍕", color: "text-rose-400" },
+      { name: "Personal Spend", icon: "👤", color: "text-purple-400" },
+      { name: "Other", icon: "📦", color: "text-slate-400" }
+    ];
+
+    // ==========================================
+    // MAIN REACT APPLICATION COMPONENT
+    // ==========================================
+    function App() {
+      // LocalStorage State Management
+      const [roommates, setRoommates] = useState(() => {
+        const saved = localStorage.getItem("roommates_data_v2");
+        return saved ? JSON.parse(saved) : INITIAL_ROOMMATES;
+      });
+
+      const [currentMemberId, setCurrentMemberId] = useState(() => {
+        return localStorage.getItem("current_member_id_v2") || "1";
+      });
+
+      const [transactions, setTransactions] = useState(() => {
+        const saved = localStorage.getItem("transactions_data_v2");
+        return saved ? JSON.parse(saved) : INITIAL_TRANSACTIONS;
+      });
+
+      const [totalGathered, setTotalGathered] = useState(() => {
+        const saved = localStorage.getItem("total_gathered_v2");
+        return saved ? parseFloat(saved) : 2400.00;
+      });
+
+      // UI Navigation State
+      const [activeTab, setActiveTab] = useState("DASHBOARD"); // DASHBOARD, TRANSACTIONS, ANALYTICS, SETTINGS
+      const [txFilter, setTxFilter] = useState("ALL"); // ALL, ACTION_NEEDED, ROOM, PERSONAL
+      const [searchQuery, setSearchQuery] = useState("");
+
+      // Modals
+      const [showDepositModal, setShowDepositModal] = useState(false);
+      const [showSpendModal, setShowSpendModal] = useState(false);
+      const [showQrModal, setShowQrModal] = useState(false);
+      const [showSwitchUserModal, setShowSwitchUserModal] = useState(false);
+      const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+      const [settleTargetTx, setSettleTargetTx] = useState(null);
+
+      // Notification toast
+      const [toastMsg, setToastMsg] = useState("");
+
+      const showToast = (msg) => {
+        setToastMsg(msg);
+        setTimeout(() => setToastMsg(""), 3200);
+      };
+
+      // Save to localStorage
+      useEffect(() => {
+        localStorage.setItem("roommates_data_v2", JSON.stringify(roommates));
+      }, [roommates]);
+
+      useEffect(() => {
+        localStorage.setItem("current_member_id_v2", currentMemberId);
+      }, [currentMemberId]);
+
+      useEffect(() => {
+        localStorage.setItem("transactions_data_v2", JSON.stringify(transactions));
+      }, [transactions]);
+
+      useEffect(() => {
+        localStorage.setItem("total_gathered_v2", totalGathered.toString());
+      }, [totalGathered]);
+
+      // Current Logged-In Roommate
+      const currentMember = useMemo(() => {
+        return roommates.find(r => r.id === currentMemberId) || roommates[0];
+      }, [roommates, currentMemberId]);
+
+      // Calculated Financial Metrics
+      const totalRoomExpenses = useMemo(() => {
+        return transactions.filter(t => t.isRoomExpense).reduce((acc, t) => acc + t.amount, 0);
+      }, [transactions]);
+
+      const currentRoomWalletBalance = useMemo(() => {
+        return Math.max(0, totalGathered - totalRoomExpenses);
+      }, [totalGathered, totalRoomExpenses]);
+
+      const currentUserSpent = useMemo(() => {
+        return transactions.filter(t => t.paidById === currentMember.id).reduce((acc, t) => acc + t.amount, 0);
+      }, [transactions, currentMember.id]);
+
+      const pendingActionCount = useMemo(() => {
+        return transactions.filter(t => !t.isRoomExpense && !t.isSettled && t.approvalStatus !== "IGNORED").length;
+      }, [transactions]);
+
+      // Filtered Transactions
+      const filteredTransactions = useMemo(() => {
+        return transactions.filter(t => {
+          const matchesQuery = t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                               t.paidByName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                               t.category.toLowerCase().includes(searchQuery.toLowerCase());
+          if (!matchesQuery) return false;
+
+          if (txFilter === "ACTION_NEEDED") {
+            return !t.isRoomExpense && !t.isSettled && t.approvalStatus !== "IGNORED";
+          }
+          if (txFilter === "ROOM") return t.isRoomExpense;
+          if (txFilter === "PERSONAL") return !t.isRoomExpense;
+          return true;
+        });
+      }, [transactions, txFilter, searchQuery]);
+
+      // Actions: Approve, Ignore, Settle
+      const handleApprove = (id) => {
+        setTransactions(prev => prev.map(t => {
+          if (t.id === id) {
+            return {
+              ...t,
+              isRoomExpense: true,
+              approvalStatus: "APPROVED",
+              category: t.category === "Personal Spend" ? "Household" : t.category
+            };
+          }
+          return t;
+        }));
+        showToast("✓ Approved as Room Shared Expense!");
+      };
+
+      const handleIgnore = (id) => {
+        setTransactions(prev => prev.map(t => {
+          if (t.id === id) {
+            return { ...t, approvalStatus: "IGNORED" };
+          }
+          return t;
+        }));
+        showToast("Marked as Ignored / Accepted Personal Spend");
+      };
+
+      const handleConfirmSettle = (tx, settleAmount) => {
+        setTransactions(prev => prev.map(t => {
+          if (t.id === tx.id) {
+            return { ...t, isSettled: true, approvalStatus: "SETTLED" };
+          }
+          return t;
+        }));
+        setTotalGathered(prev => prev + settleAmount);
+        setSettleTargetTx(null);
+        showToast(`⚡ Settled! $${settleAmount.toFixed(2)} reimbursed to Room Wallet`);
+      };
+
+      const handleDelete = (id) => {
+        setTransactions(prev => prev.filter(t => t.id !== id));
+        showToast("Transaction removed");
+      };
+
+      return (
+        <div className="w-full px-3 sm:px-4 pt-3 flex flex-col flex-1">
+
+          {/* TOAST ALERT */}
+          {toastMsg && (
+            <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900 border border-indigo-500/50 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 animate-bounce">
+              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              {toastMsg}
+            </div>
+          )}
+
+          {/* TOP HEADER: BRAND, NETLIFY STATUS & APK DOWNLOAD BUTTON */}
+          <div className="bg-gradient-to-r from-indigo-950/80 via-slate-900 to-purple-950/80 border border-indigo-500/30 rounded-3xl p-4 shadow-xl mb-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-2xl shadow-lg shadow-indigo-600/30">
+                🏠
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-base font-extrabold text-white tracking-tight">Roommate Expenses</h1>
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">React 18</span>
+                </div>
+                <p className="text-xs text-slate-400">Equal Pool Wallet • {roommates.length} Roommates</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <a 
+                href="/roommate-expenses.apk" 
+                download="RoommateExpenses.apk"
+                className="flex-1 sm:flex-initial text-center px-3.5 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-xl text-xs shadow-md flex items-center justify-center gap-1.5 transition active:scale-95">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993s-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993s-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4116 13.8533 8.0945 12 8.0945s-3.5902.3171-5.1368.8552L4.8409 5.4467a.416.416 0 00-.5676-.1521.416.416 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396"/></svg>
+                Download APK
+              </a>
+            </div>
+          </div>
+
+          {/* CURRENT ROOMMATE CARD */}
+          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 shadow-lg mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-black text-white shadow-inner"
+                style={{ backgroundColor: currentMember.color }}>
+                {currentMember.avatarLetter || currentMember.name.charAt(0)}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="font-extrabold text-white text-base leading-tight">{currentMember.name}</h2>
+                  {currentMember.isAdmin ? (
+                    <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold">👑 Admin</span>
+                  ) : (
+                    <span className="text-[10px] bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-md font-semibold">👤 Member</span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-400">{currentMember.email || currentMember.phone}</p>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => setShowSwitchUserModal(true)}
+              className="px-3.5 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+              Switch User
+            </button>
+          </div>
+
+          {/* NAVIGATION SUB-TABS */}
+          <div className="flex bg-slate-900 border border-slate-800 rounded-2xl p-1 mb-4 text-xs font-bold text-slate-400">
+            <button 
+              onClick={() => setActiveTab("DASHBOARD")}
+              className={`flex-1 py-2 rounded-xl transition ${activeTab === "DASHBOARD" ? "bg-indigo-600 text-white shadow-md" : "hover:text-white"}`}>
+              Dashboard
+            </button>
+            <button 
+              onClick={() => setActiveTab("TRANSACTIONS")}
+              className={`flex-1 py-2 rounded-xl transition flex items-center justify-center gap-1.5 ${activeTab === "TRANSACTIONS" ? "bg-indigo-600 text-white shadow-md" : "hover:text-white"}`}>
+              Transactions
+              {pendingActionCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-amber-400 text-slate-950 text-[10px] flex items-center justify-center font-extrabold">{pendingActionCount}</span>
+              )}
+            </button>
+            <button 
+              onClick={() => setActiveTab("ANALYTICS")}
+              className={`flex-1 py-2 rounded-xl transition ${activeTab === "ANALYTICS" ? "bg-indigo-600 text-white shadow-md" : "hover:text-white"}`}>
+              Splits & Analytics
+            </button>
+            <button 
+              onClick={() => setActiveTab("SETTINGS")}
+              className={`flex-1 py-2 rounded-xl transition ${activeTab === "SETTINGS" ? "bg-indigo-600 text-white shadow-md" : "hover:text-white"}`}>
+              Settings
+            </button>
+          </div>
+
+          {/* ======================================================== */}
+          {/* TAB 1: DASHBOARD VIEW                                    */}
+          {/* ======================================================== */}
+          {activeTab === "DASHBOARD" && (
+            <div className="space-y-4">
+
+              {/* SHARED POOL WALLET CARD */}
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-900 border border-indigo-500/30 p-5 shadow-2xl">
+                <div className="flex items-center justify-between text-xs font-semibold text-indigo-200 uppercase tracking-wider mb-1">
+                  <span>Equal Room Pool Wallet</span>
+                  <span className="flex items-center gap-1.5 text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 text-xs font-bold">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    {currentRoomWalletBalance > 200 ? "Healthy Balance" : "Needs Deposit"}
+                  </span>
+                </div>
+
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-4xl sm:text-5xl font-black text-white tracking-tight">
+                    ${currentRoomWalletBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <p className="text-xs text-indigo-300/80 mt-1">Remaining shared balance for upcoming bills and groceries</p>
+
+                {/* Progress bar */}
+                <div className="mt-4 bg-slate-800/90 rounded-full h-3 overflow-hidden p-0.5 border border-indigo-500/20">
+                  <div 
+                    className="bg-gradient-to-r from-emerald-400 via-indigo-400 to-purple-500 h-full rounded-full transition-all duration-700" 
+                    style={{ width: `${Math.min(100, Math.max(8, (currentRoomWalletBalance / totalGathered) * 100))}%` }}>
+                  </div>
+                </div>
+
+                {/* Metric Summary */}
+                <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-indigo-500/20 text-xs">
+                  <div>
+                    <span className="text-slate-400 block">Total Gathered in Pool:</span>
+                    <span className="text-emerald-400 font-extrabold text-sm sm:text-base">${totalGathered.toFixed(2)}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block">Spent from Pool:</span>
+                    <span className="text-rose-400 font-extrabold text-sm sm:text-base">${totalRoomExpenses.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* QUICK STATS ROW */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 shadow-sm">
+                  <div className="flex items-center gap-2 text-indigo-400 text-xs font-semibold mb-1">
+                    <span className="p-1.5 rounded-xl bg-indigo-500/10 text-indigo-400">🏠</span>
+                    Total Room Spent
+                  </div>
+                  <div className="text-xl sm:text-2xl font-black text-white">${totalRoomExpenses.toFixed(2)}</div>
+                  <span className="text-[11px] text-slate-400">Divided equally ({roommates.length} people)</span>
+                </div>
+
+                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 shadow-sm">
+                  <div className="flex items-center gap-2 text-purple-400 text-xs font-semibold mb-1">
+                    <span className="p-1.5 rounded-xl bg-purple-500/10 text-purple-400">👤</span>
+                    Your Total Spent
+                  </div>
+                  <div className="text-xl sm:text-2xl font-black text-white">${currentUserSpent.toFixed(2)}</div>
+                  <span className="text-[11px] text-slate-400">Paid by {currentMember.name.split(' ')[0]}</span>
+                </div>
+              </div>
+
+              {/* DIRECT ACTION BUTTONS: DEPOSIT & SPEND */}
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  onClick={() => setShowDepositModal(true)}
+                  className="py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-2xl shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 text-sm transition transform active:scale-95">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                  Add to Wallet
+                </button>
+
+                <button 
+                  onClick={() => setShowSpendModal(true)}
+                  className="py-3.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold rounded-2xl shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 text-sm transition transform active:scale-95">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                  Spend / Pay
+                </button>
+              </div>
+
+              {/* ACTION CALLOUT BANNER (IF PENDING ACTIONS EXIST) */}
+              {pendingActionCount > 0 && (
+                <div 
+                  onClick={() => { setTxFilter("ACTION_NEEDED"); setActiveTab("TRANSACTIONS"); }}
+                  className="cursor-pointer bg-gradient-to-r from-amber-950/40 via-amber-900/30 to-amber-950/40 border border-amber-500/40 rounded-2xl p-3.5 flex items-center justify-between hover:border-amber-400 transition">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">⚡</span>
+                    <div>
+                      <h3 className="text-xs font-bold text-amber-200">{pendingActionCount} Transaction(s) Need Action</h3>
+                      <p className="text-[11px] text-amber-400/80">Personal spends awaiting approval or settlement</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold bg-amber-500/20 text-amber-300 px-3 py-1 rounded-xl border border-amber-500/30">
+                    Review
+                  </span>
+                </div>
+              )}
+
+              {/* QR SCANNER CARD */}
+              <div 
+                onClick={() => setShowQrModal(true)}
+                className="cursor-pointer bg-gradient-to-r from-sky-950/60 to-indigo-950/60 border border-sky-500/30 rounded-3xl p-4 flex items-center justify-between hover:border-sky-400/60 transition shadow-md">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-xl shadow-md text-white">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-extrabold text-white">Scan Merchant QR & Debit Wallet</h3>
+                    <p className="text-xs text-slate-400">Grocery stores, supermarkets & utilities</p>
+                  </div>
+                </div>
+                <span className="px-3 py-1.5 bg-sky-500/20 text-sky-300 font-bold text-xs rounded-xl border border-sky-500/30">
+                  Scan QR
+                </span>
+              </div>
+
+              {/* RECENT TRANSACTIONS PREVIEW (TOP 4) */}
+              <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-extrabold text-white">Recent Transactions</h3>
+                  <button 
+                    onClick={() => setActiveTab("TRANSACTIONS")}
+                    className="text-xs text-indigo-400 font-bold hover:underline">
+                    View All ({transactions.length}) &rarr;
+                  </button>
+                </div>
+
+                <div className="space-y-2.5">
+                  {transactions.slice(0, 4).map(tx => (
+                    <TransactionItem 
+                      key={tx.id} 
+                      tx={tx} 
+                      isAdmin={currentMember.isAdmin}
+                      onApprove={handleApprove}
+                      onIgnore={handleIgnore}
+                      onSettle={() => setSettleTargetTx(tx)}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* TAB 2: ALL TRANSACTIONS VIEW                             */}
+          {/* ======================================================== */}
+          {activeTab === "TRANSACTIONS" && (
+            <div className="space-y-3">
+
+              {/* Search Bar */}
+              <div className="relative">
+                <input 
+                  type="text"
+                  placeholder="Search by title, payer, or category..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                />
+                <svg className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </div>
+
+              {/* Filter Chips */}
+              <div className="flex gap-2 overflow-x-auto pb-1 text-xs font-bold">
+                <button 
+                  onClick={() => setTxFilter("ALL")}
+                  className={`px-3 py-1.5 rounded-xl transition ${txFilter === "ALL" ? "bg-indigo-600 text-white" : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"}`}>
+                  All ({transactions.length})
+                </button>
+                <button 
+                  onClick={() => setTxFilter("ACTION_NEEDED")}
+                  className={`px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 ${txFilter === "ACTION_NEEDED" ? "bg-amber-500 text-slate-950 font-black" : "bg-slate-900 text-amber-400 border border-slate-800"}`}>
+                  ⚡ Needs Action ({pendingActionCount})
+                </button>
+                <button 
+                  onClick={() => setTxFilter("ROOM")}
+                  className={`px-3 py-1.5 rounded-xl transition ${txFilter === "ROOM" ? "bg-indigo-600 text-white" : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"}`}>
+                  Room Shared
+                </button>
+                <button 
+                  onClick={() => setTxFilter("PERSONAL")}
+                  className={`px-3 py-1.5 rounded-xl transition ${txFilter === "PERSONAL" ? "bg-indigo-600 text-white" : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"}`}>
+                  Personal Spends
+                </button>
+              </div>
+
+              {/* List */}
+              <div className="space-y-2.5 pt-1">
+                {filteredTransactions.length === 0 ? (
+                  <div className="text-center py-12 bg-slate-900/50 rounded-3xl border border-slate-800">
+                    <p className="text-3xl mb-2">🔍</p>
+                    <p className="text-sm font-bold text-white">No transactions found</p>
+                    <p className="text-xs text-slate-400 mt-1">Try changing your search query or filter tab.</p>
+                  </div>
+                ) : (
+                  filteredTransactions.map(tx => (
+                    <TransactionItem 
+                      key={tx.id} 
+                      tx={tx} 
+                      isAdmin={currentMember.isAdmin}
+                      onApprove={handleApprove}
+                      onIgnore={handleIgnore}
+                      onSettle={() => setSettleTargetTx(tx)}
+                      onDelete={handleDelete}
+                    />
+                  ))
+                )}
+              </div>
+
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* TAB 3: SPLITS & ANALYTICS                                */}
+          {/* ======================================================== */}
+          {activeTab === "ANALYTICS" && (
+            <div className="space-y-4">
+              
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
+                <h3 className="text-sm font-extrabold text-white">Equal Split Balance Sheet</h3>
+                <p className="text-xs text-slate-400">Total room expenses divided by {roommates.length} people = <strong className="text-indigo-400">${(totalRoomExpenses / roommates.length).toFixed(2)}</strong> each.</p>
+
+                <div className="space-y-3">
+                  {roommates.map(m => {
+                    const memberPaid = transactions.filter(t => t.paidById === m.id && t.isRoomExpense).reduce((sum, t) => sum + t.amount, 0);
+                    const fairShare = totalRoomExpenses / roommates.length;
+                    const diff = memberPaid - fairShare;
+
+                    return (
+                      <div key={m.id} className="bg-slate-950 border border-slate-800/80 rounded-2xl p-3 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-xs" style={{ backgroundColor: m.color }}>
+                            {m.name.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-white">{m.name}</p>
+                            <p className="text-[11px] text-slate-400">Paid: ${memberPaid.toFixed(2)}</p>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          {diff >= 0 ? (
+                            <span className="text-xs font-extrabold text-emerald-400">+$ {diff.toFixed(2)} (Receives)</span>
+                          ) : (
+                            <span className="text-xs font-extrabold text-rose-400">-$ {Math.abs(diff).toFixed(2)} (Owes)</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Category Breakdown */}
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-sm space-y-3">
+                <h3 className="text-sm font-extrabold text-white">Spending by Category</h3>
+                <div className="space-y-2">
+                  {CATEGORIES.map(cat => {
+                    const catTotal = transactions.filter(t => t.category === cat.name).reduce((sum, t) => sum + t.amount, 0);
+                    const pct = totalRoomExpenses > 0 ? (catTotal / (totalRoomExpenses + 0.01)) * 100 : 0;
+                    return (
+                      <div key={cat.name} className="space-y-1">
+                        <div className="flex justify-between text-xs font-semibold">
+                          <span className="text-slate-300 flex items-center gap-1.5">
+                            <span>{cat.icon}</span> {cat.name}
+                          </span>
+                          <span className="text-white">${catTotal.toFixed(2)}</span>
+                        </div>
+                        <div className="bg-slate-800 rounded-full h-2 overflow-hidden">
+                          <div className="bg-indigo-500 h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, pct)}%` }}></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* TAB 4: SETTINGS & ROOMMATES                              */}
+          {/* ======================================================== */}
+          {activeTab === "SETTINGS" && (
+            <div className="space-y-4">
+              
+              {/* Roommates Roster */}
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-extrabold text-white">Roommates Pool Roster</h3>
+                  <button 
+                    onClick={() => setShowAddMemberModal(true)}
+                    className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition">
+                    + Add Roommate
+                  </button>
+                </div>
+
+                <div className="space-y-2.5">
+                  {roommates.map(m => (
+                    <div key={m.id} className="p-3 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-sm" style={{ backgroundColor: m.color }}>
+                          {m.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-white flex items-center gap-2">
+                            {m.name}
+                            {m.isAdmin && <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded">Admin</span>}
+                          </p>
+                          <p className="text-xs text-slate-400">{m.email}</p>
+                        </div>
+                      </div>
+
+                      {m.id === currentMember.id ? (
+                        <span className="text-xs text-indigo-400 font-bold">Active User</span>
+                      ) : (
+                        <button 
+                          onClick={() => { setCurrentMemberId(m.id); showToast(`Switched to ${m.name}`); }}
+                          className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">
+                          Select
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Data Tools */}
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-sm space-y-3">
+                <h3 className="text-sm font-extrabold text-white">Data & Environment</h3>
+                <p className="text-xs text-slate-400">All data is locally persisted in your browser storage. You can reset to initial seed values at any time.</p>
+                <button 
+                  onClick={() => {
+                    localStorage.clear();
+                    setRoommates(INITIAL_ROOMMATES);
+                    setTransactions(INITIAL_TRANSACTIONS);
+                    setTotalGathered(2400.00);
+                    setCurrentMemberId("1");
+                    showToast("Reset all demo data successfully");
+                  }}
+                  className="w-full py-2.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-bold transition">
+                  Reset to Default Seed Data
+                </button>
+              </div>
+
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* MODAL: ADD TO WALLET DEPOSIT                             */}
+          {/* ======================================================== */}
+          {showDepositModal && (
+            <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+              <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-md space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-base font-extrabold text-white">Add Deposit to Shared Wallet</h3>
+                  <button onClick={() => setShowDepositModal(false)} className="text-slate-400 hover:text-white text-xl">&times;</button>
+                </div>
+
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const amt = parseFloat(e.target.amount.value);
+                  if (amt > 0) {
+                    setTotalGathered(prev => prev + amt);
+                    setShowDepositModal(false);
+                    showToast(`+$${amt.toFixed(2)} deposited into Shared Pool!`);
+                  }
+                }}>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold block mb-1">Deposit Amount ($)</label>
+                      <input 
+                        type="number" 
+                        name="amount" 
+                        defaultValue="300" 
+                        step="any"
+                        required 
+                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white font-extrabold text-lg focus:outline-none focus:border-indigo-500" 
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold block mb-1">Payer</label>
+                      <input 
+                        type="text" 
+                        disabled 
+                        value={currentMember.name} 
+                        className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-slate-400 text-xs font-bold" 
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold block mb-1">Payment Method / Note</label>
+                      <input 
+                        type="text" 
+                        name="note" 
+                        defaultValue="Monthly pooled contribution" 
+                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-indigo-500" 
+                      />
+                    </div>
+                    <button 
+                      type="submit" 
+                      className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl shadow-lg transition transform active:scale-95 text-xs">
+                      Confirm Deposit into Wallet
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* MODAL: SPEND / RECORD EXPENSE                            */}
+          {/* ======================================================== */}
+          {showSpendModal && (
+            <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+              <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-md space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-base font-extrabold text-white">Record Spend / Payment</h3>
+                  <button onClick={() => setShowSpendModal(false)} className="text-slate-400 hover:text-white text-xl">&times;</button>
+                </div>
+
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const title = e.target.title.value.trim();
+                  const amount = parseFloat(e.target.amount.value);
+                  const category = e.target.category.value;
+                  const isRoom = e.target.isRoom.checked;
+
+                  if (amount > 0 && title) {
+                    const newTx = {
+                      id: "tx-" + Date.now(),
+                      title,
+                      amount,
+                      category,
+                      isRoomExpense: isRoom,
+                      isSettled: false,
+                      approvalStatus: isRoom ? "APPROVED" : "PENDING",
+                      paidById: currentMember.id,
+                      paidByName: currentMember.name,
+                      date: "Just now",
+                      note: e.target.note.value
+                    };
+                    setTransactions(prev => [newTx, ...prev]);
+                    setShowSpendModal(false);
+                    showToast(isRoom ? "Room Expense debited from shared pool!" : "Personal Spend recorded (Needs Settle/Approval)");
+                  }
+                }}>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold block mb-1">Title / Merchant</label>
+                      <input 
+                        type="text" 
+                        name="title" 
+                        placeholder="e.g. Costco Groceries, High Speed WiFi" 
+                        required 
+                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-semibold focus:outline-none focus:border-indigo-500" 
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs text-slate-400 font-semibold block mb-1">Amount ($)</label>
+                        <input 
+                          type="number" 
+                          name="amount" 
+                          placeholder="55.00" 
+                          step="any"
+                          required 
+                          className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white font-extrabold text-base focus:outline-none focus:border-indigo-500" 
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-slate-400 font-semibold block mb-1">Category</label>
+                        <select 
+                          name="category" 
+                          className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs font-semibold focus:outline-none focus:border-indigo-500">
+                          {CATEGORIES.map(c => <option key={c.name} value={c.name}>{c.icon} {c.name}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold block mb-1">Note (Optional)</label>
+                      <input 
+                        type="text" 
+                        name="note" 
+                        placeholder="Shared apartment use" 
+                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-indigo-500" 
+                      />
+                    </div>
+                    <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl flex items-center gap-2.5">
+                      <input type="checkbox" id="isRoom" name="isRoom" defaultChecked className="w-4 h-4 rounded text-indigo-600" />
+                      <label htmlFor="isRoom" className="text-xs text-slate-200 font-bold select-none cursor-pointer">
+                        Room Expense (Debited equally from pool wallet)
+                      </label>
+                    </div>
+                    <button 
+                      type="submit" 
+                      className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold rounded-xl shadow-lg transition transform active:scale-95 text-xs">
+                      Submit Payment
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* MODAL: QR CODE SCANNER SIMULATOR                         */}
+          {/* ======================================================== */}
+          {showQrModal && (
+            <div className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4">
+              <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-md space-y-4 text-center">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-base font-extrabold text-white">Merchant QR Scanner</h3>
+                  <button onClick={() => setShowQrModal(false)} className="text-slate-400 hover:text-white text-xl">&times;</button>
+                </div>
+
+                <div className="relative p-6 bg-slate-950 rounded-2xl border border-sky-500/50 flex flex-col items-center justify-center overflow-hidden">
+                  <div className="w-40 h-40 bg-white rounded-2xl flex items-center justify-center p-3 shadow-xl relative">
+                    <svg className="w-full h-full text-slate-950" fill="currentColor" viewBox="0 0 24 24"><path d="M2 2h8v8H2zm2 2v4h4V4zm10-2h8v8h-8zm2 2v4h4V4zM2 14h8v8H2zm2 2v4h4v-4zm10 0h2v2h-2zm4 0h2v2h-2zm-4 4h2v2h-2zm4 0h2v2h-2zm-2-2h2v2h-2zm2-2h2v2h-2z"/></svg>
+                    <div className="absolute inset-0 border-2 border-sky-400 rounded-2xl pointer-events-none"></div>
+                    <div className="absolute left-0 right-0 h-1 bg-sky-400 scanner-line shadow-lg shadow-sky-400"></div>
+                  </div>
+                  <p className="text-xs text-emerald-400 font-extrabold mt-3">Target: Target Store #0421 • Grocery POS</p>
+                </div>
+
+                <button 
+                  onClick={() => {
+                    const newTx = {
+                      id: "tx-" + Date.now(),
+                      title: "Target Grocery Store (QR Pay)",
+                      amount: 68.25,
+                      category: "Groceries",
+                      isRoomExpense: true,
+                      isSettled: false,
+                      approvalStatus: "APPROVED",
+                      paidById: currentMember.id,
+                      paidByName: currentMember.name,
+                      date: "Just now (QR)",
+                      note: "Direct debit from pool wallet"
+                    };
+                    setTransactions(prev => [newTx, ...prev]);
+                    setShowQrModal(false);
+                    showToast("✓ $68.25 paid via QR & debited from Room Wallet!");
+                  }}
+                  className="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-extrabold rounded-xl shadow-lg transition transform active:scale-95 text-xs">
+                  Pay $68.25 from Shared Wallet
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* MODAL: SETTLE / REIMBURSE DIALOG                         */}
+          {/* ======================================================== */}
+          {settleTargetTx && (
+            <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+              <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-md space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-base font-extrabold text-white">Settle & Reimburse Wallet</h3>
+                  <button onClick={() => setSettleTargetTx(null)} className="text-slate-400 hover:text-white text-xl">&times;</button>
+                </div>
+
+                <div className="p-3.5 bg-slate-950 border border-slate-800 rounded-2xl">
+                  <p className="text-xs font-bold text-white">{settleTargetTx.title}</p>
+                  <p className="text-[11px] text-slate-400">Paid by {settleTargetTx.paidByName} • {settleTargetTx.date}</p>
+                  <div className="text-lg font-black text-rose-400 mt-1">${settleTargetTx.amount.toFixed(2)}</div>
+                </div>
+
+                <p className="text-xs text-slate-400">
+                  Reimbursing this transaction will mark it as <strong className="text-emerald-400">SETTLED</strong> and automatically credit <strong className="text-white">${settleTargetTx.amount.toFixed(2)}</strong> back into the equal room pool wallet balance.
+                </p>
+
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => setSettleTargetTx(null)}
+                    className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs">
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={() => handleConfirmSettle(settleTargetTx, settleTargetTx.amount)}
+                    className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs shadow-lg">
+                    Confirm Settle
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* MODAL: SWITCH USER                                       */}
+          {/* ======================================================== */}
+          {showSwitchUserModal && (
+            <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+              <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-md space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-base font-extrabold text-white">Switch Active Roommate</h3>
+                  <button onClick={() => setShowSwitchUserModal(false)} className="text-slate-400 hover:text-white text-xl">&times;</button>
+                </div>
+
+                <div className="space-y-2 max-h-72 overflow-y-auto">
+                  {roommates.map(r => (
+                    <div 
+                      key={r.id}
+                      onClick={() => {
+                        setCurrentMemberId(r.id);
+                        setShowSwitchUserModal(false);
+                        showToast(`Logged in as ${r.name}`);
+                      }}
+                      className={`p-3 rounded-2xl cursor-pointer flex items-center justify-between border transition ${r.id === currentMember.id ? "border-indigo-500 bg-indigo-950/40" : "border-slate-800 hover:bg-slate-800"}`}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-sm" style={{ backgroundColor: r.color }}>
+                          {r.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white flex items-center gap-1.5">
+                            {r.name}
+                            {r.isAdmin && <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-bold">Admin</span>}
+                          </p>
+                          <p className="text-[11px] text-slate-400">{r.email}</p>
+                        </div>
+                      </div>
+                      {r.id === currentMember.id && <span className="text-indigo-400 text-xs font-bold">✓ Active</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* MODAL: ADD ROOMMATE                                      */}
+          {/* ======================================================== */}
+          {showAddMemberModal && (
+            <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+              <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-md space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-base font-extrabold text-white">Add New Roommate</h3>
+                  <button onClick={() => setShowAddMemberModal(false)} className="text-slate-400 hover:text-white text-xl">&times;</button>
+                </div>
+
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const name = e.target.name.value.trim();
+                  const email = e.target.email.value.trim();
+                  const colors = ["#6366F1", "#10B981", "#F59E0B", "#EC4899", "#8B5CF6", "#06B6D4"];
+                  const pickedColor = colors[roommates.length % colors.length];
+
+                  if (name) {
+                    const newMember = {
+                      id: "m-" + Date.now(),
+                      name,
+                      email: email || `${name.toLowerCase().replace(/\s+/g, '.')}@example.com`,
+                      phone: "+1 (555) 000-0000",
+                      isAdmin: false,
+                      color: pickedColor,
+                      avatarLetter: name.charAt(0).toUpperCase()
+                    };
+                    setRoommates(prev => [...prev, newMember]);
+                    setShowAddMemberModal(false);
+                    showToast(`Added ${name} to room pool!`);
+                  }
+                }}>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold block mb-1">Full Name</label>
+                      <input type="text" name="name" placeholder="e.g. David Miller" required className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs font-semibold focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold block mb-1">Email (Optional)</label>
+                      <input type="email" name="email" placeholder="david@example.com" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <button type="submit" className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold rounded-xl text-xs transition">
+                      Add to Pool
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+        </div>
+      );
+    }
+
+    // ==========================================
+    // TRANSACTION ITEM COMPONENT
+    // ==========================================
+    function TransactionItem({ tx, isAdmin, onApprove, onIgnore, onSettle, onDelete }) {
+      const isActionNeeded = !tx.isRoomExpense && !tx.isSettled && tx.approvalStatus !== "IGNORED";
+
+      return (
+        <div className="bg-slate-950/90 border border-slate-800/90 rounded-2xl p-3.5 space-y-2 transition hover:border-slate-700 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-extrabold text-white text-xs sm:text-sm">{tx.title}</span>
+                {tx.isRoomExpense ? (
+                  <span className="text-[10px] bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full font-bold">Room Shared</span>
+                ) : tx.isSettled ? (
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">✓ Settled</span>
+                ) : tx.approvalStatus === "IGNORED" ? (
+                  <span className="text-[10px] bg-slate-800 text-slate-400 border border-slate-700 px-2 py-0.5 rounded-full font-bold">Ignored</span>
+                ) : (
+                  <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold">⚡ Pending Action</span>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-400">
+                Paid by <strong className="text-slate-200">{tx.paidByName}</strong> • {tx.date} • <span className="text-indigo-300">{tx.category}</span>
+              </p>
+              {tx.note && <p className="text-[11px] text-slate-400 italic">"{tx.note}"</p>}
+            </div>
+
+            <div className="text-right">
+              <div className={`text-sm sm:text-base font-black ${tx.isRoomExpense ? "text-indigo-400" : "text-slate-200"}`}>
+                -${tx.amount.toFixed(2)}
+              </div>
+            </div>
+          </div>
+
+          {/* ACTION CONTROLS: APPROVE, SETTLE, IGNORE */}
+          {isActionNeeded && (
+            <div className="flex items-center gap-2 pt-2 border-t border-slate-800/80">
+              <button 
+                onClick={() => onApprove(tx.id)}
+                className="flex-1 py-1.5 bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/40 rounded-xl text-[11px] font-bold transition">
+                ✓ Approve as Room
+              </button>
+              <button 
+                onClick={onSettle}
+                className="flex-1 py-1.5 bg-emerald-600/30 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 rounded-xl text-[11px] font-bold transition">
+                ⚡ Settle
+              </button>
+              <button 
+                onClick={() => onIgnore(tx.id)}
+                className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl text-[11px] font-semibold transition">
+                Ignore
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Mount to DOM
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
