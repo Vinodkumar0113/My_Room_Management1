@@ -8,19 +8,21 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.data.model.Expense
 import com.example.data.model.PoolDeposit
 import com.example.data.model.Roommate
+import com.example.data.model.RoomEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Database(
-    entities = [Roommate::class, PoolDeposit::class, Expense::class],
-    version = 4,
+    entities = [Roommate::class, PoolDeposit::class, Expense::class, RoomEvent::class],
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun roommateDao(): RoommateDao
     abstract fun poolDepositDao(): PoolDepositDao
     abstract fun expenseDao(): ExpenseDao
+    abstract fun roomEventDao(): RoomEventDao
 
     companion object {
         @Volatile
@@ -56,6 +58,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val roommateDao = database.roommateDao()
                 val depositDao = database.poolDepositDao()
                 val expenseDao = database.expenseDao()
+                val roomEventDao = database.roomEventDao()
 
                 // Insert roommates with 1 or more Admins (Vinod Kumar as primary admin, Alex Morgan as co-admin)
                 val roommates = listOf(
@@ -208,6 +211,210 @@ abstract class AppDatabase : RoomDatabase() {
                     )
                 )
                 expenseDao.insertExpenses(sampleExpenses)
+
+                // Initialize The Event Side: Chores, Cooking rotations & Utility bill countdowns
+                val sampleEvents = listOf(
+                    // Cleaning Duties
+                    RoomEvent(
+                        id = 1,
+                        title = "Kitchen Counter & Stove Deep Clean",
+                        category = "CLEANING",
+                        assignedMemberId = 2,
+                        assignedMemberName = "Alex Morgan",
+                        assignedMemberColorHex = "#10B981",
+                        dueDate = now + 1 * day,
+                        dayOfWeek = 1, // Mon
+                        status = "IN_PROGRESS",
+                        isCompleted = false,
+                        recurrence = "WEEKLY",
+                        notes = "Wipe stove, degrease hood, disinfect counters and clean sink drain"
+                    ),
+                    RoomEvent(
+                        id = 2,
+                        title = "Living Room Mop & Carpet Vacuum",
+                        category = "CLEANING",
+                        assignedMemberId = 3,
+                        assignedMemberName = "David Chen",
+                        assignedMemberColorHex = "#F59E0B",
+                        dueDate = now + 2 * day,
+                        dayOfWeek = 2, // Tue
+                        status = "TODO",
+                        isCompleted = false,
+                        recurrence = "WEEKLY",
+                        notes = "Vacuum sofa, sweep under TV stand, mop wood floors"
+                    ),
+                    RoomEvent(
+                        id = 3,
+                        title = "Bathroom Scrubbing & Mirror Polish",
+                        category = "CLEANING",
+                        assignedMemberId = 4,
+                        assignedMemberName = "Sam Wilson",
+                        assignedMemberColorHex = "#EC4899",
+                        dueDate = now + 3 * day,
+                        dayOfWeek = 3, // Wed
+                        status = "TODO",
+                        isCompleted = false,
+                        recurrence = "WEEKLY",
+                        notes = "Clean shower tiles, toilet bowl, and mirror glass"
+                    ),
+                    RoomEvent(
+                        id = 4,
+                        title = "Balcony Sweep & Trash Bins Curbside",
+                        category = "CLEANING",
+                        assignedMemberId = 1,
+                        assignedMemberName = "Vinod Kumar",
+                        assignedMemberColorHex = "#4F46E5",
+                        dueDate = now,
+                        dayOfWeek = 7, // Sun
+                        status = "COMPLETED",
+                        isCompleted = true,
+                        completedAt = now - 2 * 60 * 60 * 1000L,
+                        completedByMemberName = "Vinod Kumar",
+                        recurrence = "WEEKLY",
+                        notes = "Take dry & wet bins to collection area downstairs"
+                    ),
+
+                    // Cooking Rotations
+                    RoomEvent(
+                        id = 5,
+                        title = "Monday Dinner: Pasta & Italian Sauce",
+                        category = "COOKING",
+                        assignedMemberId = 1,
+                        assignedMemberName = "Vinod Kumar",
+                        assignedMemberColorHex = "#4F46E5",
+                        dueDate = now + 1 * day,
+                        dayOfWeek = 1,
+                        status = "TODO",
+                        isCompleted = false,
+                        recurrence = "WEEKLY",
+                        notes = "Garlic bread + Penne Arrabiata for 4 roommates"
+                    ),
+                    RoomEvent(
+                        id = 6,
+                        title = "Tuesday Dinner: Curry & Fragrant Rice Feast",
+                        category = "COOKING",
+                        assignedMemberId = 2,
+                        assignedMemberName = "Alex Morgan",
+                        assignedMemberColorHex = "#10B981",
+                        dueDate = now + 2 * day,
+                        dayOfWeek = 2,
+                        status = "TODO",
+                        isCompleted = false,
+                        recurrence = "WEEKLY",
+                        notes = "Paneer butter masala / Chicken curry with basmati rice"
+                    ),
+                    RoomEvent(
+                        id = 7,
+                        title = "Wednesday Dinner: Healthy Stir Fry & Noodles",
+                        category = "COOKING",
+                        assignedMemberId = 3,
+                        assignedMemberName = "David Chen",
+                        assignedMemberColorHex = "#F59E0B",
+                        dueDate = now + 3 * day,
+                        dayOfWeek = 3,
+                        status = "TODO",
+                        isCompleted = false,
+                        recurrence = "WEEKLY",
+                        notes = "Fresh veggies, tofu/chicken, soy sauce and noodles"
+                    ),
+                    RoomEvent(
+                        id = 8,
+                        title = "Weekend Special: Rooftop Barbecue / Feast",
+                        category = "COOKING",
+                        assignedMemberId = 4,
+                        assignedMemberName = "Sam Wilson",
+                        assignedMemberColorHex = "#EC4899",
+                        dueDate = now + 6 * day,
+                        dayOfWeek = 6,
+                        status = "TODO",
+                        isCompleted = false,
+                        recurrence = "WEEKLY",
+                        notes = "Grilled skewers, burgers, cold drinks"
+                    ),
+
+                    // Utility Bill Countdowns
+                    RoomEvent(
+                        id = 9,
+                        title = "Electricity Board Power Bill",
+                        category = "UTILITY_BILL",
+                        assignedMemberId = 1,
+                        assignedMemberName = "Vinod Kumar",
+                        assignedMemberColorHex = "#4F46E5",
+                        dueDate = now + 3 * day,
+                        dayOfWeek = 3,
+                        status = "TODO",
+                        isCompleted = false,
+                        isBill = true,
+                        billAmount = 85.0,
+                        recurrence = "MONTHLY",
+                        notes = "Account #EB-99214. Consumer portal link active. Pay before penalty date!"
+                    ),
+                    RoomEvent(
+                        id = 10,
+                        title = "High-Speed WiFi Fiber Internet Recharge",
+                        category = "UTILITY_BILL",
+                        assignedMemberId = 4,
+                        assignedMemberName = "Sam Wilson",
+                        assignedMemberColorHex = "#EC4899",
+                        dueDate = now + 5 * day,
+                        dayOfWeek = 5,
+                        status = "TODO",
+                        isCompleted = false,
+                        isBill = true,
+                        billAmount = 60.0,
+                        recurrence = "MONTHLY",
+                        notes = "300 Mbps unlimited fiber connection renewal"
+                    ),
+                    RoomEvent(
+                        id = 11,
+                        title = "Monthly Room Apartment Rent Payment",
+                        category = "UTILITY_BILL",
+                        assignedMemberId = 1,
+                        assignedMemberName = "Vinod Kumar",
+                        assignedMemberColorHex = "#4F46E5",
+                        dueDate = now + 6 * day,
+                        dayOfWeek = 6,
+                        status = "TODO",
+                        isCompleted = false,
+                        isBill = true,
+                        billAmount = 1200.0,
+                        recurrence = "MONTHLY",
+                        notes = "Transfer directly to landlord via NEFT/UPI pool funds"
+                    ),
+                    RoomEvent(
+                        id = 12,
+                        title = "LPG Cooking Gas Cylinder Refill",
+                        category = "UTILITY_BILL",
+                        assignedMemberId = 2,
+                        assignedMemberName = "Alex Morgan",
+                        assignedMemberColorHex = "#10B981",
+                        dueDate = now + 12 * day,
+                        dayOfWeek = 5,
+                        status = "TODO",
+                        isCompleted = false,
+                        isBill = true,
+                        billAmount = 32.0,
+                        recurrence = "MONTHLY",
+                        notes = "Book online via Indane / HP gas portal"
+                    ),
+                    RoomEvent(
+                        id = 13,
+                        title = "Drinking Water 20L Dispenser Recharge",
+                        category = "UTILITY_BILL",
+                        assignedMemberId = 3,
+                        assignedMemberName = "David Chen",
+                        assignedMemberColorHex = "#F59E0B",
+                        dueDate = now + 2 * day,
+                        dayOfWeek = 2,
+                        status = "TODO",
+                        isCompleted = false,
+                        isBill = true,
+                        billAmount = 25.0,
+                        recurrence = "MONTHLY",
+                        notes = "5 cans prepaid token booklet"
+                    )
+                )
+                roomEventDao.insertEvents(sampleEvents)
             }
         }
     }

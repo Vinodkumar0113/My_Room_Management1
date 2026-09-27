@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -16,6 +17,7 @@ import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.EventAvailable
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
@@ -53,6 +55,7 @@ import com.example.ui.components.RejectExpenseDialog
 import com.example.ui.components.SettleExpenseDialog
 import com.example.ui.components.SwitchUserBottomSheet
 import com.example.ui.screens.AuthScreen
+import com.example.ui.screens.EventsScreen
 import com.example.ui.screens.ExpensesScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.ProfileScreen
@@ -64,6 +67,7 @@ import com.example.ui.viewmodel.ExpenseViewModel
 
 sealed class Screen(val route: String, val title: String, val selectedIcon: ImageVector, val unselectedIcon: ImageVector) {
     object Home : Screen("home", "Wallet", Icons.Filled.Home, Icons.Outlined.Home)
+    object Events : Screen("events", "Room Life", Icons.Filled.EventAvailable, Icons.Outlined.EventAvailable)
     object Roommates : Screen("roommates", "Roommates", Icons.Filled.Group, Icons.Outlined.Group)
     object ScanPay : Screen("scan_pay", "Scan QR", Icons.Filled.QrCodeScanner, Icons.Outlined.QrCodeScanner)
     object Expenses : Screen("expenses", "Transactions", Icons.Filled.ReceiptLong, Icons.Outlined.ReceiptLong)
@@ -126,9 +130,9 @@ fun MainAppScreen(
 
     val navItems = listOf(
         Screen.Home,
-        Screen.Roommates,
-        Screen.ScanPay,
+        Screen.Events,
         Screen.Expenses,
+        Screen.Roommates,
         Screen.Profile
     )
 
@@ -180,11 +184,28 @@ fun MainAppScreen(
                     onOpenSwitchUser = { showSwitchUserSheet = true },
                     onOpenQrScanner = { navController.navigate(Screen.ScanPay.route) },
                     onNavigateToExpenses = { navController.navigate(Screen.Expenses.route) },
+                    onNavigateToEvents = { navController.navigate(Screen.Events.route) },
+                    onToggleEventCompletion = { viewModel.toggleEventCompletion(it) },
                     onSettleExpense = { expenseToSettle = it },
                     onApproveExpense = { expenseToApprove = it },
                     onRejectExpense = { expenseToReject = it },
                     onIgnoreExpense = { viewModel.ignoreExpense(it) },
                     onDeleteExpense = { viewModel.deleteExpense(it) }
+                )
+            }
+
+            composable(Screen.Events.route) {
+                EventsScreen(
+                    uiState = uiState,
+                    onAddEvent = { title, cat, memberId, memberName, colorHex, dueDate, dayOfWeek, isBill, billAmount, recurrence, notes ->
+                        viewModel.addRoomEvent(title, cat, memberId, memberName, colorHex, dueDate, dayOfWeek, isBill, billAmount, recurrence, notes)
+                    },
+                    onToggleCompletion = { viewModel.toggleEventCompletion(it) },
+                    onUpdateStatus = { event, newStatus -> viewModel.updateEventStatus(event, newStatus) },
+                    onDeleteEvent = { viewModel.deleteRoomEvent(it) },
+                    onPayUtilityBill = { event, memberId, memberName, source ->
+                        viewModel.payUtilityBillDirectly(event, memberId, memberName, source)
+                    }
                 )
             }
 
@@ -205,7 +226,9 @@ fun MainAppScreen(
                         navController.navigate(Screen.Expenses.route) {
                             popUpTo(Screen.Home.route)
                         }
-                    }
+                    },
+                    onVerifyPin = { viewModel.verifyWalletPin(it) },
+                    onVerifyBiometric = { viewModel.verifyBiometric() }
                 )
             }
 
@@ -246,7 +269,11 @@ fun MainAppScreen(
                     },
                     onAddLinkedAccount = { viewModel.addLinkedAccount(it) },
                     onRemoveLinkedAccount = { viewModel.removeLinkedAccount(it) },
-                    onUpdateLanguage = { viewModel.updateLanguage(it) }
+                    onUpdateLanguage = { viewModel.updateLanguage(it) },
+                    onUpdatePin = { viewModel.changeWalletPin(it) },
+                    onUpdateSecurityPolicies = { thresh, limit, bio ->
+                        viewModel.updateSecuritySettings(thresh, limit, bio)
+                    }
                 )
             }
         }

@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.QrCodeScanner
@@ -76,6 +77,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.Roommate
+import com.example.ui.components.SecuritySettingsDialog
 import com.example.ui.theme.EmeraldPositive
 import com.example.ui.theme.RoseDebit
 import com.example.ui.viewmodel.UiState
@@ -92,6 +94,8 @@ fun ProfileScreen(
     onAddLinkedAccount: (String) -> Unit,
     onRemoveLinkedAccount: (String) -> Unit,
     onUpdateLanguage: (String) -> Unit,
+    onUpdatePin: ((String) -> Boolean)? = null,
+    onUpdateSecurityPolicies: ((Double, Double, Boolean) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val user = uiState.currentMember
@@ -99,6 +103,7 @@ fun ProfileScreen(
     var showAddAccountDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showAutoPaySuccessSnackbar by remember { mutableStateOf(false) }
+    var showSecurityDialog by remember { mutableStateOf(false) }
     var expandedFaqIndex by remember { mutableStateOf<Int?>(null) }
 
     val languages = listOf(
@@ -292,6 +297,133 @@ fun ProfileScreen(
                                 )
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        // ==========================================
+        // SECURITY & CLOUD SYNC CENTER
+        // ==========================================
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("security_center_card"),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(MaterialTheme.colorScheme.primaryContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Shield,
+                                    contentDescription = "Security Shield",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "Security & Cloud Sync Center",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "PIN, Biometrics, Spending Limits & Realtime Sync",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // Security Badges Grid
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(modifier = Modifier.padding(10.dp)) {
+                                Text("Wallet PIN", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("● ● ● ● (Set)", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = EmeraldPositive)
+                            }
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(modifier = Modifier.padding(10.dp)) {
+                                Text("Dual Approval", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(">$${uiState.highValueThreshold.toInt()}", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
+                            }
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(modifier = Modifier.padding(10.dp)) {
+                                Text("Daily Limit", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("$${uiState.dailySpendingLimit.toInt()}/day", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = EmeraldPositive.copy(alpha = 0.1f),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(imageVector = Icons.Default.CheckCircle, contentDescription = null, tint = EmeraldPositive, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = uiState.cloudSyncStatus,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = EmeraldPositive
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Button(
+                        onClick = { showSecurityDialog = true },
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth().testTag("open_security_settings_button")
+                    ) {
+                        Icon(imageVector = Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Manage PIN, Limits & Cloud Rules", fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -902,6 +1034,22 @@ fun ProfileScreen(
                     Text("Close")
                 }
             }
+        )
+    }
+
+    if (showSecurityDialog) {
+        SecuritySettingsDialog(
+            currentPin = user?.pin ?: "1234",
+            highValueThreshold = uiState.highValueThreshold,
+            dailySpendingLimit = uiState.dailySpendingLimit,
+            isBiometricEnabled = uiState.isBiometricEnabled,
+            cloudSyncStatus = uiState.cloudSyncStatus,
+            securityAuditLogs = uiState.securityAuditLogs,
+            onUpdatePin = { newPin -> onUpdatePin?.invoke(newPin) ?: true },
+            onUpdateSecurityPolicies = { thresh, limit, bio ->
+                onUpdateSecurityPolicies?.invoke(thresh, limit, bio)
+            },
+            onDismiss = { showSecurityDialog = false }
         )
     }
 }

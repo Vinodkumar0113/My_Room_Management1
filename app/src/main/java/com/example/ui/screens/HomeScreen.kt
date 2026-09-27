@@ -36,10 +36,16 @@ import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.CleaningServices
+import androidx.compose.material.icons.filled.ElectricBolt
+import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.EventNote
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -63,6 +69,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.Expense
@@ -90,6 +97,8 @@ fun HomeScreen(
     onRejectExpense: (Expense) -> Unit,
     onIgnoreExpense: (Expense) -> Unit,
     onDeleteExpense: (Expense) -> Unit,
+    onNavigateToEvents: () -> Unit = {},
+    onToggleEventCompletion: ((com.example.data.model.RoomEvent) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var dashboardFilterTab by remember { mutableStateOf("ALL") } // ALL, ACTION_NEEDED, ROOM, PERSONAL
@@ -479,6 +488,177 @@ fun HomeScreen(
                             modifier = Modifier.testTag("scan_now_button")
                         ) {
                             Text("Scan QR", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        }
+                    }
+                }
+            }
+        }
+
+        // ==========================================
+        // 4.5 THE EVENT SIDE & CHORE MATRIX SNAPSHOT
+        // (The True All-in-One Digital Page)
+        // ==========================================
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("room_life_snapshot_card"),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(MaterialTheme.colorScheme.primaryContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.EventNote,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = "The Event Side",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = Color(0xFFECFDF5)
+                                    ) {
+                                        Text(
+                                            text = "Chores & Matrix",
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF059669)
+                                        )
+                                    }
+                                }
+                                Text(
+                                    text = "Ledger meets house chores & utility countdowns",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        TextButton(onClick = onNavigateToEvents) {
+                            Text("Open Matrix →", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // 1. Cleaning duty row
+                    val nextCleaning = uiState.cleaningDuties.firstOrNull { !it.isCompleted } ?: uiState.cleaningDuties.firstOrNull()
+                    nextCleaning?.let { cleaning ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .padding(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = cleaning.isCompleted,
+                                onCheckedChange = { onToggleEventCompletion?.invoke(cleaning) },
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.CleaningServices,
+                                        contentDescription = null,
+                                        tint = Color(0xFF0284C7),
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = cleaning.title,
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                Text(
+                                    text = "Assigned: ${cleaning.assignedMemberName} • ${if (cleaning.isCompleted) "Completed ✅" else "Pending"}",
+                                    fontSize = 11.sp,
+                                    color = if (cleaning.isCompleted) Color(0xFF059669) else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // 2. Cooking rotation & Next bill countdown row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val nextCooking = uiState.cookingRotations.firstOrNull { !it.isCompleted } ?: uiState.cookingRotations.firstOrNull()
+                        val nextBill = uiState.utilityBills.firstOrNull { !it.isCompleted } ?: uiState.utilityBills.firstOrNull()
+
+                        nextCooking?.let { cooking ->
+                            Card(
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF7ED))
+                            ) {
+                                Column(modifier = Modifier.padding(10.dp)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Default.Restaurant, contentDescription = null, tint = Color(0xFFEA580C), modifier = Modifier.size(14.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("Today's Chef", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFEA580C))
+                                    }
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(cooking.assignedMemberName, fontSize = 13.sp, fontWeight = FontWeight.Black, color = Color(0xFF9A3412))
+                                    Text(cooking.title, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = Color(0xFFC2410C))
+                                }
+                            }
+                        }
+
+                        nextBill?.let { bill ->
+                            Card(
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFFEF2F2))
+                            ) {
+                                Column(modifier = Modifier.padding(10.dp)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Default.ElectricBolt, contentDescription = null, tint = Color(0xFFDC2626), modifier = Modifier.size(14.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("Next Bill", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFDC2626))
+                                    }
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(bill.title, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis, color = Color(0xFF991B1B))
+                                    Text(
+                                        text = if (bill.billAmount != null) "$${String.format("%.0f", bill.billAmount)} • Tap to Pay" else "Upcoming",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = Color(0xFFB91C1C)
+                                    )
+                                }
+                            }
                         }
                     }
                 }

@@ -278,13 +278,28 @@ fun ExpenseItemCard(
 
                     if (expense.notes.isNotBlank()) {
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = expense.notes,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "💬 ",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Text(
+                                    text = expense.notes,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(2.dp))

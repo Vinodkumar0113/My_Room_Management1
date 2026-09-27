@@ -1,0 +1,135 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // ZERO-TRUST FIRESTORE SECURITY RULES FOR ROOMMATE EXPENSES
+    // ===============================================================
+    // The Firebase API key is public in client-side web apps.
+    // These security rules are what prevent:
+    // 1. Random visitors deleting expenses
+    // 2. Arbitrary/malicious transaction writes (spoofing amounts/payers)
+    // 3. Unauthorized access to private roommate balances & PINs
+    // ===============================================================
+
+    // Helper: Verify user is authenticated
+    function isAuthenticated() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    // Helper: Verify user belongs to this specific roommate group
+    function isGroupMember(groupId) {
+      return isAuthenticated() && (
+        // Matches user's UID or Email recorded in the group document
+        request.auth.uid in get(/databases/$(database)/documents/roommate_groups/$(groupId)).data.memberUids ||
+        request.auth.token.email in get(/databases/$(database)/documents/roommate_groups/$(groupId)).data.memberEmails ||
+        // Fallback for initial group setup or single-room deployment
+        request.auth.token.groupId == groupId
+      );
+    }
+
+    // Helper: Verify user is a designated Group Admin
+    function isGroupAdmin(groupId) {
+      return isAuthenticated() && (
+        request.auth.token.admin == true ||
+        request.auth.uid in get(/databases/$(database)/documents/roommate_groups/$(groupId)).data.adminUids ||
+        request.auth.token.email in get(/databases/$(database)/documents/roommate_groups/$(groupId)).data.adminEmails
+      );
+    }
+
+    // ===============================================================
+    // 1. ROOT ROOM GROUP: PROTECTS PRIVATE ROOMMATE DATA
+    // Prevents public scraping of members, email addresses, and phone numbers
+    // ===============================================================
+    match /roommate_groups/{groupId} {
+      // ❌ BLOCKS PUBLIC READ: Only authenticated group members can read roommate records
+      allow read: if isGroupMember(groupId);
+
+      // ❌ BLOCKS ARBITRARY WRITE: Only authenticated users can initialize, only admin can update
+      allow create: if isAuthenticated();
+      allow update: if isGroupAdmin(groupId);
+      
+      // 🚫 DESTRUCTION PREVENTION: No one can delete the entire roommate group
+      allow delete: if false;
+
+      // =============================================================
+      // 2. TRANSACTIONS SUB-COLLECTION
+      // =============================================================
+      match /transactions/{txId} {
+        // 🔒 RULE 1: PROTECT PRIVATE DATA FROM PUBLIC
+        // Random visitors cannot read transactions
+        allow read: if isGroupMember(groupId);
+
+        // 🛡️ RULE 2: PREVENT ARBITRARY WRITES & FINANCIAL SPOOFING
+        // - Requester must be a verified group member
+        // - Amount must be a positive number (> 0 and <= $10,000 safety ceiling)
+        // - Prevents negative amounts, zero amounts, or non-numeric types
+        // - Required schema fields must all be present
+        // - Payer identity cannot be spoofed (paidById must match authenticated UID or Admin)
+        allow create: if isGroupMember(groupId)
+          && request.resource.data.amount is number
+          && request.resource.data.amount > 0
+          && request.resource.data.amount <= 10000
+          && request.resource.data.keys().hasAll(['title', 'amount', 'paidById', 'timestamp'])
+          && request.resource.data.title is string
+          && request.resource.data.title.size() > 0
+          && request.resource.data.title.size() <= 120
+          && (request.resource.data.paidById == request.auth.uid || isGroupAdmin(groupId));
+
+        // 🛡️ RULE 3: TAMPER-PROOF FINANCIAL HISTORY
+        // - The expense amount ($) cannot be changed after creation
+        // - Payer ID cannot be transferred to someone else
+        // - Approvals/Settlements can only be modified by Group Admin
+        allow update: if isGroupMember(groupId)
+          && request.resource.data.amount == resource.data.amount
+          && request.resource.data.paidById == resource.data.paidById
+          && (
+            isGroupAdmin(groupId) ||
+            (resource.data.paidById == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['note', 'receiptUrl', 'category']))
+          );
+
+        // 🚫 RULE 4: PREVENT "DELETE EVERY EXPENSE" ATTACKS
+        // - Random website visitors: ❌ DENIED
+        // - Regular roommates: ❌ DENIED (stops accidental or malicious ledger wipes)
+        // - Only authenticated Group Admin can delete an individual mistake
+        allow delete: if isGroupAdmin(groupId);
+      }
+
+      // =============================================================
+      // 3. SHARED WALLET DEPOSITS: IMMUTABLE AUDIT TRAIL
+      // =============================================================
+      match /deposits/{depId} {
+        allow read: if isGroupMember(groupId);
+        allow create: if isGroupMember(groupId)
+          && request.resource.data.amount is number
+          && request.resource.data.amount > 0
+          && request.resource.data.amount <= 5000;
+        // Deposits cannot be edited or erased once pooled
+        allow update: if false;
+        allow delete: if false;
+      }
+
+      // =============================================================
+      // 4. CHORES & ROOM EVENTS (Cleaning, Cooking, Utility Countdowns)
+      // =============================================================
+      match /events/{eventId} {
+        allow read: if isGroupMember(groupId);
+        allow create: if isGroupMember(groupId);
+        // Members can tick checkboxes or update status
+        allow update: if isGroupMember(groupId);
+        // Only Admin can permanently remove duties
+        allow delete: if isGroupAdmin(groupId);
+      }
+
+      // =============================================================
+      // 5. IMMUTABLE SECURITY AUDIT LOGS
+      // =============================================================
+      match /audit_logs/{logId} {
+        allow read: if isGroupMember(groupId);
+        allow create: if isGroupMember(groupId);
+        allow update: if false;
+        allow delete: if false;
+      }
+    }
+  }
+}
