@@ -293,7 +293,7 @@ fun ScanPayScreen(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "$${String.format("%.2f", uiState.remainingPoolBalance)}",
+                                text = "₹${String.format("%.2f", uiState.remainingPoolBalance)}",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
@@ -720,7 +720,7 @@ fun ScanPayScreen(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     Text(
-                                        text = "$${String.format("%.2f", item.suggestedAmount)}",
+                                        text = "₹${String.format("%.2f", item.suggestedAmount)}",
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.ExtraBold,
                                         color = EmeraldPositive
@@ -810,7 +810,7 @@ fun ScanPayScreen(
                                 )
 
                                 Text(
-                                    text = "$${String.format("%.2f", merchant.suggestedAmount)}",
+                                    text = "₹${String.format("%.2f", merchant.suggestedAmount)}",
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = EmeraldPositive
@@ -979,7 +979,7 @@ fun ScanPayScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "$${String.format("%.2f", amount)}",
+                        text = "₹${String.format("%.2f", amount)}",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.ExtraBold,
                         color = EmeraldPositive
@@ -1279,7 +1279,7 @@ fun DirectQrPaymentBottomSheet(
 
             if (!isBalanceSufficient && amount > 0) {
                 Text(
-                    text = "⚠️ Amount exceeds current wallet balance ($${String.format("%.2f", remainingWalletBalance)})",
+                    text = "⚠️ Amount exceeds current wallet balance (₹${String.format("%.2f", remainingWalletBalance)})",
                     style = MaterialTheme.typography.bodySmall,
                     color = RoseDebit,
                     fontWeight = FontWeight.Bold,
@@ -1314,7 +1314,7 @@ fun DirectQrPaymentBottomSheet(
                 Icon(imageVector = Icons.Default.Payment, contentDescription = "Pay", modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Pay $${String.format("%.2f", amount)} from Room Wallet",
+                    text = "Pay ₹${String.format("%.2f", amount)} from Room Wallet",
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp
                 )

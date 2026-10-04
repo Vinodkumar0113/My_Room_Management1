@@ -286,7 +286,7 @@ fun RoommatesScreen(
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                         Text(
-                                            text = "+$${String.format("%.2f", memberDeposits)}",
+                                            text = "+₹${String.format("%.2f", memberDeposits)}",
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.Bold,
                                             color = EmeraldPositive
@@ -300,7 +300,7 @@ fun RoommatesScreen(
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                         Text(
-                                            text = "$${String.format("%.2f", roomExpensesPaid)}",
+                                            text = "₹${String.format("%.2f", roomExpensesPaid)}",
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.primary
@@ -314,7 +314,7 @@ fun RoommatesScreen(
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                         Text(
-                                            text = "$${String.format("%.2f", personalExpensesPaid)}",
+                                            text = "₹${String.format("%.2f", personalExpensesPaid)}",
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.secondary

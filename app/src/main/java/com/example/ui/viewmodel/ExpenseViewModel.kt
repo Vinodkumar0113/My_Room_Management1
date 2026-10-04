@@ -9,6 +9,7 @@ import com.example.data.model.PoolDeposit
 import com.example.data.model.Roommate
 import com.example.data.model.RoomEvent
 import com.example.data.repository.ExpenseRepository
+import com.example.data.sync.FirestoreSyncManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -58,8 +59,8 @@ data class UiState(
     val selectedMemberId: Long? = null,
     val searchQuery: String = "",
     val authErrorMessage: String? = null,
-    val highValueThreshold: Double = 100.0,
-    val dailySpendingLimit: Double = 250.0,
+    val highValueThreshold: Double = 1000.0,
+    val dailySpendingLimit: Double = 2500.0,
     val todaySpentAmount: Double = 0.0,
     val isBiometricEnabled: Boolean = true,
     val securityAuditLogs: List<String> = emptyList(),
@@ -78,13 +79,14 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
     private val _currentMemberId = MutableStateFlow<Long?>(null)
     private val _isAuthenticated = MutableStateFlow(false)
     private val _authErrorMessage = MutableStateFlow<String?>(null)
-    private val _highValueThreshold = MutableStateFlow(100.0)
-    private val _dailySpendingLimit = MutableStateFlow(250.0)
+    private val _highValueThreshold = MutableStateFlow(1000.0)
+    private val _dailySpendingLimit = MutableStateFlow(2500.0)
     private val _isBiometricEnabled = MutableStateFlow(true)
     private val _securityAuditLogs = MutableStateFlow<List<String>>(
         listOf("Multi-layer Wallet Protection & Real-time Cloud Sync initialized.")
     )
     private val _cloudSyncStatus = MutableStateFlow("🟢 Live Sync Ready • Firestore Rules Enabled")
+    private var syncManager: FirestoreSyncManager? = null
 
     val uiState: StateFlow<UiState>
 
@@ -96,6 +98,12 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
             expenseDao = database.expenseDao(),
             roomEventDao = database.roomEventDao()
         )
+
+        syncManager = FirestoreSyncManager(repository, database, viewModelScope).also { sm ->
+            sm.init { status ->
+                _cloudSyncStatus.value = status
+            }
+        }
 
         val coreDataFlow = combine(
             repository.allRoommates,
@@ -283,7 +291,7 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
         _highValueThreshold.value = highValueLimit
         _dailySpendingLimit.value = dailyLimit
         _isBiometricEnabled.value = biometric
-        addAuditLog("⚙️ Security Policy Updated: Dual-Approval at $$highValueLimit • Limit $$dailyLimit/day")
+        addAuditLog("⚙️ Security Policy Updated: Dual-Approval at ₹$highValueLimit • Limit ₹$dailyLimit/day")
     }
 
     fun addAuditLog(entry: String) {
@@ -358,7 +366,7 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
                         memberId = newId,
                         memberName = name.trim(),
                         amount = initialDepositAmount,
-                        note = "Initial registration wallet deposit by ${name.trim()} ($$initialDepositAmount)"
+                        note = "Initial registration wallet deposit by ${name.trim()} (₹$initialDepositAmount)"
                     )
                 )
             }
@@ -473,14 +481,14 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
     // Add money directly to shared wallet
     fun addDeposit(memberId: Long, memberName: String, amount: Double, note: String) {
         viewModelScope.launch {
-            repository.insertDeposit(
-                PoolDeposit(
-                    memberId = memberId,
-                    memberName = memberName,
-                    amount = amount,
-                    note = note.ifBlank { "Wallet deposit by $memberName" }
-                )
+            val dep = PoolDeposit(
+                memberId = memberId,
+                memberName = memberName,
+                amount = amount,
+                note = note.ifBlank { "Wallet deposit by $memberName" }
             )
+            repository.insertDeposit(dep)
+            syncManager?.pushDeposit(dep)
         }
     }
 
@@ -500,10 +508,10 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val isHighValue = paymentSource == "POOL" && amount >= _highValueThreshold.value
             val approvalStatus = if (isHighValue) {
-                addAuditLog("🛡️ Dual-Approval required: $title ($${String.format("%.2f", amount)} >= $${_highValueThreshold.value.toInt()})")
+                addAuditLog("🛡️ Dual-Approval required: $title (₹${String.format("%.2f", amount)} >= ₹${_highValueThreshold.value.toInt()})")
                 "NEEDS_DUAL_APPROVAL"
             } else if (isRoomExpense) {
-                addAuditLog("✓ Direct debit: $title ($${String.format("%.2f", amount)}) by $paidByMemberName")
+                addAuditLog("✓ Direct debit: $title (₹${String.format("%.2f", amount)}) by $paidByMemberName")
                 "ACTIVE"
             } else if (paymentSource == "POOL") {
                 "PERSONAL_PENDING"
@@ -511,22 +519,22 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
                 "PERSONAL_OUT_OF_POCKET"
             }
 
-            repository.insertExpense(
-                Expense(
-                    title = title,
-                    amount = amount,
-                    paidByMemberId = paidByMemberId,
-                    paidByMemberName = paidByMemberName,
-                    category = category,
-                    isRoomExpense = isRoomExpense,
-                    paymentSource = paymentSource,
-                    paymentMethod = paymentMethod,
-                    recipientDetail = recipientDetail,
-                    notes = notes,
-                    isSettled = false,
-                    approvalStatus = approvalStatus
-                )
+            val exp = Expense(
+                title = title,
+                amount = amount,
+                paidByMemberId = paidByMemberId,
+                paidByMemberName = paidByMemberName,
+                category = category,
+                isRoomExpense = isRoomExpense,
+                paymentSource = paymentSource,
+                paymentMethod = paymentMethod,
+                recipientDetail = recipientDetail,
+                notes = notes,
+                isSettled = false,
+                approvalStatus = approvalStatus
             )
+            repository.insertExpense(exp)
+            syncManager?.pushExpense(exp)
         }
     }
 
@@ -609,7 +617,7 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
                     approvedByAdmin = approver
                 )
             )
-            addAuditLog("🛡️ Dual-Approval GRANTED: $approver approved $$${String.format("%.2f", expense.amount)} for '${expense.title}'")
+            addAuditLog("🛡️ Dual-Approval GRANTED: $approver approved ₹${String.format("%.2f", expense.amount)} for '${expense.title}'")
         }
     }
 
@@ -810,7 +818,7 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
                 completedAt = System.currentTimeMillis(),
                 completedByName = paidByMemberName
             )
-            addAuditLog("Utility Bill Paid: '${event.title}' ($$amount) cleared via $paymentSource by $paidByMemberName")
+            addAuditLog("Utility Bill Paid: '${event.title}' (₹$amount) cleared via $paymentSource by $paidByMemberName")
         }
     }
 
@@ -853,6 +861,11 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
                 FilterTimePeriod.CUSTOM -> customStart to customEnd
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        syncManager?.stop()
     }
 }
 

@@ -317,7 +317,7 @@ fun AddEventDialog(
                 OutlinedTextField(
                     value = billAmountText,
                     onValueChange = { billAmountText = it },
-                    label = { Text("Bill Amount ($)") },
+                    label = { Text("Bill Amount (₹)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),

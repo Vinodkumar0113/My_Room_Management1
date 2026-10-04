@@ -155,7 +155,7 @@ fun ApproveExpenseDialog(
                         )
                     }
                     Text(
-                        text = "$${String.format("%.2f", expense.amount)}",
+                        text = "₹${String.format("%.2f", expense.amount)}",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
                         color = RoseDebit
@@ -281,7 +281,7 @@ fun SettleExpenseDialog(
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = "Reimburse the personal spend of $${String.format("%.2f", expense.amount)} directly back to the shared room wallet. This will restore the pooled balance.",
+                text = "Reimburse the personal spend of ₹${String.format("%.2f", expense.amount)} directly back to the shared room wallet. This will restore the pooled balance.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -342,7 +342,7 @@ fun SettleExpenseDialog(
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            text = "+$${String.format("%.2f", expense.amount)}",
+                            text = "+₹${String.format("%.2f", expense.amount)}",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.ExtraBold,
                             color = EmeraldPositive
@@ -479,7 +479,7 @@ fun RejectExpenseDialog(
                         )
                     }
                     Text(
-                        text = "$${String.format("%.2f", expense.amount)}",
+                        text = "₹${String.format("%.2f", expense.amount)}",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
                         color = RoseDebit

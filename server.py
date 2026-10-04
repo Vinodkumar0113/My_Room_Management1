@@ -28,21 +28,21 @@ DEFAULT_DATABASE = {
         {"id": "4", "name": "Sam Wilson", "email": "sam.w@roommail.com", "phone": "+91 98765 43213", "isAdmin": False, "pin": "1234", "color": "#EC4899"}
     ],
     "deposits": [
-        {"id": "dep-1", "memberId": "1", "memberName": "Vinod Kumar", "amount": 500.0, "timestamp": int(time.time() * 1000) - 86400000 * 10, "note": "Shared wallet deposit"},
-        {"id": "dep-2", "memberId": "2", "memberName": "Alex Morgan", "amount": 500.0, "timestamp": int(time.time() * 1000) - 86400000 * 10, "note": "Shared wallet deposit"},
-        {"id": "dep-3", "memberId": "3", "memberName": "David Chen", "amount": 500.0, "timestamp": int(time.time() * 1000) - 86400000 * 10, "note": "Shared wallet deposit"},
-        {"id": "dep-4", "memberId": "4", "memberName": "Sam Wilson", "amount": 500.0, "timestamp": int(time.time() * 1000) - 86400000 * 10, "note": "Shared wallet deposit"}
+        {"id": "dep-1", "memberId": "1", "memberName": "Vinod Kumar", "amount": 5000.0, "timestamp": int(time.time() * 1000) - 86400000 * 10, "note": "Shared wallet deposit"},
+        {"id": "dep-2", "memberId": "2", "memberName": "Alex Morgan", "amount": 5000.0, "timestamp": int(time.time() * 1000) - 86400000 * 10, "note": "Shared wallet deposit"},
+        {"id": "dep-3", "memberId": "3", "memberName": "David Chen", "amount": 5000.0, "timestamp": int(time.time() * 1000) - 86400000 * 10, "note": "Shared wallet deposit"},
+        {"id": "dep-4", "memberId": "4", "memberName": "Sam Wilson", "amount": 5000.0, "timestamp": int(time.time() * 1000) - 86400000 * 10, "note": "Shared wallet deposit"}
     ],
     "expenses": [
-        {"id": "exp-1", "title": "Monthly Room Rent", "amount": 1200.0, "paidByMemberId": "1", "paidByMemberName": "Vinod Kumar", "category": "Rent", "isRoomExpense": True, "paymentSource": "POOL", "timestamp": int(time.time() * 1000) - 86400000 * 5, "notes": "Room rent debited from wallet pool"},
-        {"id": "exp-2", "title": "Weekly Grocery Run", "amount": 150.0, "paidByMemberId": "2", "paidByMemberName": "Alex Morgan", "category": "Groceries", "isRoomExpense": True, "paymentSource": "POOL", "timestamp": int(time.time() * 1000) - 86400000 * 3, "notes": "Vegetables, milk, snacks"},
-        {"id": "exp-3", "title": "WiFi Fiber Broadband", "amount": 60.0, "paidByMemberId": "4", "paidByMemberName": "Sam Wilson", "category": "Utilities", "isRoomExpense": True, "paymentSource": "POOL", "timestamp": int(time.time() * 1000) - 86400000 * 2, "notes": "Monthly high speed internet"}
+        {"id": "exp-1", "title": "Monthly Room Rent", "amount": 12000.0, "paidByMemberId": "1", "paidByMemberName": "Vinod Kumar", "category": "Rent", "isRoomExpense": True, "paymentSource": "POOL", "timestamp": int(time.time() * 1000) - 86400000 * 5, "notes": "Room rent debited from wallet pool"},
+        {"id": "exp-2", "title": "Weekly Grocery Run", "amount": 1500.0, "paidByMemberId": "2", "paidByMemberName": "Alex Morgan", "category": "Groceries", "isRoomExpense": True, "paymentSource": "POOL", "timestamp": int(time.time() * 1000) - 86400000 * 3, "notes": "Vegetables, milk, snacks"},
+        {"id": "exp-3", "title": "WiFi Fiber Broadband", "amount": 799.0, "paidByMemberId": "4", "paidByMemberName": "Sam Wilson", "category": "Utilities", "isRoomExpense": True, "paymentSource": "POOL", "timestamp": int(time.time() * 1000) - 86400000 * 2, "notes": "Monthly high speed internet"}
     ],
     "events": [
         {"id": "ev-1", "title": "Kitchen Counter & Stove Deep Clean", "category": "CLEANING", "assignedMemberName": "Alex Morgan", "assignedMemberColor": "#10B981", "dayOfWeek": 1, "isCompleted": False, "recurrence": "WEEKLY"},
         {"id": "ev-2", "title": "Living Room Sweep & Vacuum", "category": "CLEANING", "assignedMemberName": "David Chen", "assignedMemberColor": "#F59E0B", "dayOfWeek": 2, "isCompleted": False, "recurrence": "WEEKLY"},
-        {"id": "ev-3", "title": "Monday Dinner: Pasta & Italian Sauce", "category": "COOKING", "assignedMemberName": "Vinod Kumar", "assignedMemberColor": "#4F46E5", "dayOfWeek": 1, "isCompleted": False, "recurrence": "WEEKLY"},
-        {"id": "ev-4", "title": "Electricity Board Power Bill", "category": "UTILITY_BILL", "assignedMemberName": "Vinod Kumar", "assignedMemberColor": "#4F46E5", "isBill": True, "billAmount": 85.0, "daysLeft": 3, "isCompleted": False}
+        {"id": "ev-3", "title": "Monday Dinner: Paneer & Roti", "category": "COOKING", "assignedMemberName": "Vinod Kumar", "assignedMemberColor": "#4F46E5", "dayOfWeek": 1, "isCompleted": False, "recurrence": "WEEKLY"},
+        {"id": "ev-4", "title": "Electricity Board Power Bill", "category": "UTILITY_BILL", "assignedMemberName": "Vinod Kumar", "assignedMemberColor": "#4F46E5", "isBill": True, "billAmount": 1250.0, "daysLeft": 3, "isCompleted": False}
     ]
 }
 

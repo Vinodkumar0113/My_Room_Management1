@@ -138,7 +138,7 @@ fun ExpenseItemCard(
                             modifier = Modifier.weight(1f)
                         )
                         Text(
-                            text = "-$${String.format("%.2f", expense.amount)}",
+                            text = "-₹${String.format("%.2f", expense.amount)}",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.ExtraBold,
                             color = RoseDebit,

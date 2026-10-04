@@ -117,7 +117,7 @@ fun ProfileScreen(
     )
 
     val faqs = listOf(
-        "How does the Equal Room Wallet work?" to "Each roommate contributes equal amounts (e.g. $500) to form a pooled balance ($2,000). All shared expenses like rent, groceries, and wifi are debited directly from this pool.",
+        "How does the Equal Room Wallet work?" to "Each roommate contributes equal amounts (e.g. ₹5,000) to form a pooled balance (₹20,000). All shared expenses like rent, groceries, and wifi are debited directly from this pool.",
         "What happens when I spend for personal items?" to "You can record personal spends debited from the wallet. The app flags them as Pending Review so you can Settle the amount back or request Admin Approval to treat it as a shared expense.",
         "How do Admin approvals and rejections work?" to "Room admins can review unapproved personal transactions to either approve them into shared room expenses or reject unauthorized spends.",
         "How does Auto Pay refill the shared wallet?" to "When Auto Pay is enabled, your scheduled monthly contribution is automatically credited from your linked bank/UPI directly into the shared room pool on the 1st of every month."
@@ -274,7 +274,7 @@ fun ProfileScreen(
                             Column(modifier = Modifier.padding(12.dp)) {
                                 Text("Pool Contributed", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Text(
-                                    text = "$${String.format("%.0f", userDeposits)}",
+                                    text = "₹${String.format("%.0f", userDeposits)}",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = EmeraldPositive
@@ -290,7 +290,7 @@ fun ProfileScreen(
                             Column(modifier = Modifier.padding(12.dp)) {
                                 Text("Total Debited/Spent", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Text(
-                                    text = "$${String.format("%.0f", userSpends)}",
+                                    text = "₹${String.format("%.0f", userSpends)}",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface
@@ -376,7 +376,7 @@ fun ProfileScreen(
                         ) {
                             Column(modifier = Modifier.padding(10.dp)) {
                                 Text("Dual Approval", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text(">$${uiState.highValueThreshold.toInt()}", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
+                                Text(">₹${uiState.highValueThreshold.toInt()}", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
                             }
                         }
 
@@ -387,7 +387,7 @@ fun ProfileScreen(
                         ) {
                             Column(modifier = Modifier.padding(10.dp)) {
                                 Text("Daily Limit", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("$${uiState.dailySpendingLimit.toInt()}/day", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface)
+                                Text("₹${uiState.dailySpendingLimit.toInt()}/day", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface)
                             }
                         }
                     }
@@ -512,7 +512,7 @@ fun ProfileScreen(
                             ) {
                                 Text("Monthly Refill Amount:", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                                 Text(
-                                    text = "$${String.format("%.0f", autoPayAmount)}",
+                                    text = "₹${String.format("%.0f", autoPayAmount)}",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = EmeraldPositive
@@ -549,7 +549,7 @@ fun ProfileScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        listOf(250.0, 500.0, 750.0, 1000.0).forEach { amt ->
+                        listOf(2000.0, 5000.0, 7500.0, 10000.0).forEach { amt ->
                             val isSelected = autoPayAmount == amt
                             FilterChip(
                                 selected = isSelected,
@@ -561,7 +561,7 @@ fun ProfileScreen(
                                         user?.autoPaySource ?: "Google Pay UPI"
                                     )
                                 },
-                                label = { Text("$$amt", fontWeight = FontWeight.Bold) }
+                                label = { Text("₹${amt.toInt()}", fontWeight = FontWeight.Bold) }
                             )
                         }
                     }
@@ -587,7 +587,7 @@ fun ProfileScreen(
                         Icon(imageVector = Icons.Default.Wallet, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "⚡ Deposit $${String.format("%.0f", autoPayAmount)} into Pool Now (Auto-Pay)",
+                            text = "⚡ Deposit ₹${String.format("%.0f", autoPayAmount)} into Pool Now (Auto-Pay)",
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp
                         )
@@ -607,7 +607,7 @@ fun ProfileScreen(
                                 Icon(imageVector = Icons.Default.CheckCircle, contentDescription = null, tint = EmeraldPositive, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "Successfully debited $${String.format("%.0f", autoPayAmount)} from $autoPaySource into Shared Wallet!",
+                                    text = "Successfully debited ₹${String.format("%.0f", autoPayAmount)} from $autoPaySource into Shared Wallet!",
                                     color = Color(0xFF065F46),
                                     style = MaterialTheme.typography.bodySmall,
                                     fontWeight = FontWeight.Bold

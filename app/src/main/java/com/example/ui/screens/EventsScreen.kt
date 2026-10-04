@@ -490,7 +490,7 @@ fun BillCountdownCard(
 
                 if (bill.billAmount != null) {
                     Text(
-                        text = "$${String.format("%.0f", bill.billAmount)}",
+                        text = "₹${String.format("%.0f", bill.billAmount)}",
                         fontWeight = FontWeight.Black,
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.primary
@@ -1320,7 +1320,7 @@ fun KanbanCardItem(
 
                 if (event.billAmount != null) {
                     Text(
-                        text = "$${String.format("%.2f", event.billAmount)}",
+                        text = "₹${String.format("%.2f", event.billAmount)}",
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.primary

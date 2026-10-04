@@ -898,8 +898,8 @@ private fun RegisterTabContent(
             OutlinedTextField(
                 value = initialDeposit,
                 onValueChange = { initialDeposit = it },
-                label = { Text("Initial Deposit to Room Wallet ($)") },
-                placeholder = { Text("500") },
+                label = { Text("Initial Deposit to Room Wallet (₹)") },
+                placeholder = { Text("5000") },
                 leadingIcon = { Icon(imageVector = Icons.Default.AccountBalanceWallet, contentDescription = null) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
@@ -916,7 +916,7 @@ private fun RegisterTabContent(
 
             Button(
                 onClick = {
-                    val dep = initialDeposit.toDoubleOrNull() ?: 500.0
+                    val dep = initialDeposit.toDoubleOrNull() ?: 5000.0
                     onRegister(
                         name,
                         email,

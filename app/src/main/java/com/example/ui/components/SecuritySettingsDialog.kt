@@ -291,14 +291,14 @@ fun SecuritySettingsDialog(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            listOf(50.0, 100.0, 200.0, 500.0).forEach { amount ->
+                            listOf(500.0, 1000.0, 2000.0, 5000.0).forEach { amount ->
                                 FilterChip(
                                     selected = selectedThreshold == amount,
                                     onClick = {
                                         selectedThreshold = amount
                                         onUpdateSecurityPolicies(amount, selectedDailyLimit, biometricState)
                                     },
-                                    label = { Text("$$${amount.toInt()}", fontWeight = FontWeight.Bold) }
+                                    label = { Text("₹${amount.toInt()}", fontWeight = FontWeight.Bold) }
                                 )
                             }
                         }
@@ -319,14 +319,14 @@ fun SecuritySettingsDialog(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            listOf(100.0, 250.0, 500.0, 1000.0).forEach { limit ->
+                            listOf(1000.0, 2500.0, 5000.0, 10000.0).forEach { limit ->
                                 FilterChip(
                                     selected = selectedDailyLimit == limit,
                                     onClick = {
                                         selectedDailyLimit = limit
                                         onUpdateSecurityPolicies(selectedThreshold, limit, biometricState)
                                     },
-                                    label = { Text("$$${limit.toInt()}/day", fontWeight = FontWeight.Bold) }
+                                    label = { Text("₹${limit.toInt()}/day", fontWeight = FontWeight.Bold) }
                                 )
                             }
                         }
@@ -342,7 +342,7 @@ fun SecuritySettingsDialog(
                                 Icon(imageVector = Icons.Default.Shield, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "Active Rules: Dual-approval at $${selectedThreshold.toInt()} • Max $${selectedDailyLimit.toInt()}/day",
+                                    text = "Active Rules: Dual-approval at ₹${selectedThreshold.toInt()} • Max ₹${selectedDailyLimit.toInt()}/day",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer

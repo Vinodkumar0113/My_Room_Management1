@@ -165,7 +165,7 @@ fun WalletSecurityPinDialog(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "$${String.format("%.2f", amount)}",
+                            text = "₹${String.format("%.2f", amount)}",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Black,
                             color = EmeraldPositive
@@ -194,7 +194,7 @@ fun WalletSecurityPinDialog(
                             Icon(imageVector = Icons.Default.Shield, contentDescription = null, tint = Color(0xFFD97706), modifier = Modifier.size(20.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "🛡️ High-Value Spend (>$${highValueThreshold.toInt()}). Held for Dual-Approval before pool deduction.",
+                                text = "🛡️ High-Value Spend (>₹${highValueThreshold.toInt()}). Held for Dual-Approval before pool deduction.",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF92400E)
@@ -217,7 +217,7 @@ fun WalletSecurityPinDialog(
                             Icon(imageVector = Icons.Default.WarningAmber, contentDescription = null, tint = Color(0xFFDC2626), modifier = Modifier.size(20.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "⚠️ Daily limit ($${dailySpendingLimit.toInt()}) reached ($${String.format("%.2f", todaySpent)} spent today). Requires Admin counter-sign.",
+                                text = "⚠️ Daily limit (₹${dailySpendingLimit.toInt()}) reached (₹${String.format("%.2f", todaySpent)} spent today). Requires Admin counter-sign.",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF991B1B)

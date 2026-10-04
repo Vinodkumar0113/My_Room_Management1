@@ -652,7 +652,7 @@ fun HomeScreen(
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(bill.title, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis, color = Color(0xFF991B1B))
                                     Text(
-                                        text = if (bill.billAmount != null) "$${String.format("%.0f", bill.billAmount)} • Tap to Pay" else "Upcoming",
+                                        text = if (bill.billAmount != null) "₹${String.format("%.0f", bill.billAmount)} • Tap to Pay" else "Upcoming",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         color = Color(0xFFB91C1C)

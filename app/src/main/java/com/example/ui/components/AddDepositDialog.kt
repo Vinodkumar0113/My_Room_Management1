@@ -135,7 +135,7 @@ fun AddDepositDialog(
             OutlinedTextField(
                 value = amountText,
                 onValueChange = { amountText = it },
-                label = { Text("Contribution Amount ($ e.g. 500)") },
+                label = { Text("Contribution Amount (₹ e.g. 5000)") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier
                     .fillMaxWidth()

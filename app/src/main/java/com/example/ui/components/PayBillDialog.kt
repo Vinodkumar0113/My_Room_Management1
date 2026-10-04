@@ -107,7 +107,7 @@ fun PayBillDialog(
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "$${String.format("%.2f", billAmount)}",
+                        text = "₹${String.format("%.2f", billAmount)}",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Black,
                         color = MaterialTheme.colorScheme.primary
@@ -148,7 +148,7 @@ fun PayBillDialog(
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
                         Text(
-                            text = "Shared Pool Balance: $${String.format("%.2f", poolBalance)}",
+                            text = "Shared Pool Balance: ₹${String.format("%.2f", poolBalance)}",
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 14.sp,
                             color = if (canPayFromPool) Color(0xFF065F46) else Color(0xFF991B1B)

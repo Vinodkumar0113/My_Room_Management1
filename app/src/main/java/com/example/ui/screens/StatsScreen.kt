@@ -149,7 +149,7 @@ fun StatsScreen(
                         Column {
                             Text("Total Deposited", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(
-                                text = "+$${String.format("%.2f", totalFilteredDeposits)}",
+                                text = "+₹${String.format("%.2f", totalFilteredDeposits)}",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = EmeraldPositive
@@ -159,7 +159,7 @@ fun StatsScreen(
                         Column {
                             Text("Total Spent", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(
-                                text = "-$${String.format("%.2f", totalFilteredExpenses)}",
+                                text = "-₹${String.format("%.2f", totalFilteredExpenses)}",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = RoseDebit
@@ -179,7 +179,7 @@ fun StatsScreen(
                         Column(modifier = Modifier.weight(1f)) {
                             Text("🏠 Room Shared Expenses", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(
-                                text = "$${String.format("%.2f", roomFilteredExpenses)}",
+                                text = "₹${String.format("%.2f", roomFilteredExpenses)}",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
@@ -189,7 +189,7 @@ fun StatsScreen(
                         Column(modifier = Modifier.weight(1f)) {
                             Text("👤 Personal Expenses", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(
-                                text = "$${String.format("%.2f", personalFilteredExpenses)}",
+                                text = "₹${String.format("%.2f", personalFilteredExpenses)}",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.secondary
@@ -258,7 +258,7 @@ fun StatsScreen(
                                     }
 
                                     Text(
-                                        text = "$${String.format("%.2f", catAmount)} (${(pct * 100).toInt()}%)",
+                                        text = "₹${String.format("%.2f", catAmount)} (${(pct * 100).toInt()}%)",
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -345,7 +345,7 @@ fun StatsScreen(
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        text = "Room: $${String.format("%.0f", memberRoomExp)} | Personal: $${String.format("%.0f", memberPersonalExp)}",
+                                        text = "Room: ₹${String.format("%.0f", memberRoomExp)} | Personal: ₹${String.format("%.0f", memberPersonalExp)}",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -353,7 +353,7 @@ fun StatsScreen(
                             }
 
                             Text(
-                                text = "$${String.format("%.2f", memberTotalExp)}",
+                                text = "₹${String.format("%.2f", memberTotalExp)}",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface

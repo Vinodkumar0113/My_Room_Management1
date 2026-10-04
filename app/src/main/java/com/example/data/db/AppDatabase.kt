@@ -128,12 +128,12 @@ abstract class AppDatabase : RoomDatabase() {
                 val now = System.currentTimeMillis()
                 val day = 24 * 60 * 60 * 1000L
 
-                // Each member contributed $500 to form the initial $2000 shared wallet pool
+                // Each member contributed ₹5,000 to form the initial ₹20,000 shared wallet pool
                 val deposits = listOf(
-                    PoolDeposit(id = 1, memberId = 1, memberName = "Vinod Kumar", amount = 500.0, timestamp = now - 15 * day, note = "Pool deposit by Vinod ($500)"),
-                    PoolDeposit(id = 2, memberId = 2, memberName = "Alex Morgan", amount = 500.0, timestamp = now - 15 * day, note = "Pool deposit by Alex ($500)"),
-                    PoolDeposit(id = 3, memberId = 3, memberName = "David Chen", amount = 500.0, timestamp = now - 15 * day, note = "Pool deposit by David ($500)"),
-                    PoolDeposit(id = 4, memberId = 4, memberName = "Sam Wilson", amount = 500.0, timestamp = now - 15 * day, note = "Pool deposit by Sam ($500)")
+                    PoolDeposit(id = 1, memberId = 1, memberName = "Vinod Kumar", amount = 5000.0, timestamp = now - 15 * day, note = "Pool deposit by Vinod (₹5,000)"),
+                    PoolDeposit(id = 2, memberId = 2, memberName = "Alex Morgan", amount = 5000.0, timestamp = now - 15 * day, note = "Pool deposit by Alex (₹5,000)"),
+                    PoolDeposit(id = 3, memberId = 3, memberName = "David Chen", amount = 5000.0, timestamp = now - 15 * day, note = "Pool deposit by David (₹5,000)"),
+                    PoolDeposit(id = 4, memberId = 4, memberName = "Sam Wilson", amount = 5000.0, timestamp = now - 15 * day, note = "Pool deposit by Sam (₹5,000)")
                 )
                 depositDao.insertDeposits(deposits)
 
@@ -142,14 +142,14 @@ abstract class AppDatabase : RoomDatabase() {
                     Expense(
                         id = 1,
                         title = "Monthly Room Rent",
-                        amount = 1200.0,
+                        amount = 12000.0,
                         paidByMemberId = 1,
                         paidByMemberName = "Vinod Kumar",
                         category = "Room Rent",
                         isRoomExpense = true,
                         paymentSource = "POOL",
                         timestamp = now - 12 * day,
-                        notes = "Paid room rent directly from pooled $2000",
+                        notes = "Paid room rent directly from pooled ₹20,000",
                         isSettled = false,
                         approvalStatus = "ACTIVE"
                     ),

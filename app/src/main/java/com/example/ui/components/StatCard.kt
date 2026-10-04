@@ -165,7 +165,7 @@ fun WalletSummaryCard(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "$${String.format("%.2f", remainingBalance)}",
+                        text = "₹${String.format("%.2f", remainingBalance)}",
                         fontSize = 36.sp,
                         fontWeight = FontWeight.Black,
                         color = if (isLowBalance) RoseDebit else MaterialTheme.colorScheme.onPrimaryContainer,
@@ -196,13 +196,13 @@ fun WalletSummaryCard(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Spent: $${String.format("%.2f", totalDebited)}",
+                        text = "Spent: ₹${String.format("%.2f", totalDebited)}",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f)
                     )
                     Text(
-                        text = "out of $${String.format("%.2f", totalDeposited)} Gathered",
+                        text = "out of ₹${String.format("%.2f", totalDeposited)} Gathered",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -266,7 +266,7 @@ fun MiniStatCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "$${String.format("%.2f", amount)}",
+                    text = "₹${String.format("%.2f", amount)}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
